@@ -1,0 +1,137 @@
+{% extends 'interviewer/base.html' %}
+
+{% block title %}Upload Resume — AI Interview Mentor{% endblock %}
+
+{% block content %}
+<section class="upload-section" id="upload-section">
+    <div class="upload-container">
+        <h1 class="section-title">Upload Your Resume</h1>
+        <p class="section-subtitle">Upload a PDF version of your resume to begin your AI-powered interview.</p>
+
+        {% if error %}
+        <div class="alert alert-error" id="upload-error">
+            <span class="alert-icon">⚠️</span>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" id="upload-form">
+            {% csrf_token %}
+
+            <!-- Drag and drop area -->
+            <div class="drop-zone" id="drop-zone">
+                <div class="drop-zone-content">
+                    <div class="drop-icon">📁</div>
+                    <p class="drop-text">Drag & drop your resume here</p>
+                    <p class="drop-hint">or click to browse files</p>
+                    <span class="drop-format">PDF files only • Max 5MB</span>
+                </div>
+                <input type="file" name="resume" id="resume-input" accept=".pdf" class="file-input" required>
+            </div>
+
+            <!-- Selected file info -->
+            <div class="file-info" id="file-info" style="display: none;">
+                <div class="file-icon">📄</div>
+                <div class="file-details">
+                    <span class="file-name" id="file-name"></span>
+                    <span class="file-size" id="file-size"></span>
+                </div>
+                <button type="button" class="file-remove" id="file-remove" title="Remove file">✕</button>
+            </div>
+
+            <!-- Submit button -->
+            <button type="submit" class="btn btn-primary btn-lg btn-full" id="begin-interview-btn" disabled>
+                <span class="btn-text">Begin Interview</span>
+                <span class="btn-loader" style="display: none;">
+                    <span class="spinner"></span>
+                    Analyzing Resume...
+                </span>
+            </button>
+        </form>
+    </div>
+</section>
+
+<script>
+// ─── Upload Page Logic ──────────────────────────────────────────
+(function() {
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('resume-input');
+    const fileInfo = document.getElementById('file-info');
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+    const fileRemove = document.getElementById('file-remove');
+    const submitBtn = document.getElementById('begin-interview-btn');
+    const uploadForm = document.getElementById('upload-form');
+
+    // Click to browse
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    // Drag events
+    ['dragenter', 'dragover'].forEach(evt => {
+        dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+        dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+        });
+    });
+
+    // Handle drop
+    dropZone.addEventListener('drop', (e) => {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            showFileInfo(files[0]);
+        }
+    });
+
+    // Handle file input change
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            showFileInfo(fileInput.files[0]);
+        }
+    });
+
+    // Show selected file info
+    function showFileInfo(file) {
+        if (!file.name.toLowerCase().endsWith('.pdf')) {
+            alert('Please select a PDF file.');
+            return;
+        }
+        fileName.textContent = file.name;
+        fileSize.textContent = formatSize(file.size);
+        fileInfo.style.display = 'flex';
+        dropZone.style.display = 'none';
+        submitBtn.disabled = false;
+    }
+
+    // Format file size
+    function formatSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    // Remove file
+    fileRemove.addEventListener('click', () => {
+        fileInput.value = '';
+        fileInfo.style.display = 'none';
+        dropZone.style.display = 'flex';
+        submitBtn.disabled = true;
+    });
+
+    // Show loading on submit
+    uploadForm.addEventListener('submit', () => {
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnLoader = submitBtn.querySelector('.btn-loader');
+        btnText.style.display = 'none';
+        btnLoader.style.display = 'inline-flex';
+        submitBtn.disabled = true;
+    });
+})();
+</script>
+{% endblock %}

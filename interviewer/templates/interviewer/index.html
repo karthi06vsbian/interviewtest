@@ -1,0 +1,44 @@
+{% extends 'interviewer/base.html' %}
+
+{% block title %}AI Interview Mentor — Your AI Interview Coach{% endblock %}
+
+{% block content %}
+<section class="hero" id="hero-section">
+    <div class="hero-content">
+        <div class="hero-badge">✨ AI-Powered Practice</div>
+        <h1 class="hero-title">
+            Welcome to<br>
+            <span class="gradient-text">AI Interview Mentor</span>
+        </h1>
+        <p class="hero-subtitle">
+            Upload your resume, practice with an AI interviewer, and get instant 
+            feedback to ace your next interview. Powered by advanced AI.
+        </p>
+        <a href="{% url 'upload' %}" class="btn btn-primary btn-lg" id="start-interview-btn">
+            <span>Start Interview</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+        </a>
+    </div>
+
+    <!-- Feature cards -->
+    <div class="features-grid">
+        <div class="feature-card" id="feature-resume">
+            <div class="feature-icon">📄</div>
+            <h3>Resume Analysis</h3>
+            <p>AI analyzes your resume to craft personalized interview questions.</p>
+        </div>
+        <div class="feature-card" id="feature-voice">
+            <div class="feature-icon">🎙️</div>
+            <h3>Voice Interview</h3>
+            <p>Speak naturally — AI listens and responds with a human-like voice.</p>
+        </div>
+        <div class="feature-card" id="feature-feedback">
+            <div class="feature-icon">📊</div>
+            <h3>Instant Feedback</h3>
+            <p>Get detailed evaluation with scores, strengths, and improvement tips.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

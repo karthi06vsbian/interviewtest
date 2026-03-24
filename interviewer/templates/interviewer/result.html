@@ -1,0 +1,288 @@
+{% extends 'interviewer/base.html' %}
+
+{% block title %}Interview Results — AI Interview Mentor{% endblock %}
+
+{% block content %}
+<section class="result-section" id="result-section">
+    <h1 class="section-title">Interview Evaluation</h1>
+    <p class="section-subtitle">
+        {% if is_public_share %}
+        A shared AI interview result. See the score breakdown, then try your own session.
+        {% else %}
+        Here's how you performed in your AI interview session.
+        {% endif %}
+    </p>
+
+    <!-- Overall Score -->
+    <div class="score-card" id="score-card">
+        <div class="score-circle" id="score-circle">
+            <svg viewBox="0 0 120 120" class="score-svg">
+                <circle cx="60" cy="60" r="54" class="score-bg"/>
+                <circle cx="60" cy="60" r="54" class="score-progress" id="score-progress"
+                        stroke-dasharray="339.292" stroke-dashoffset="339.292"/>
+            </svg>
+            <div class="score-value">
+                <span class="score-number" id="score-number">0</span>
+                <span class="score-total">/10</span>
+            </div>
+        </div>
+        <p class="score-label">Overall Score</p>
+    </div>
+
+    <!-- Sub-scores -->
+    <div class="subscores-grid" id="subscores-grid">
+        <div class="subscore-card">
+            <div class="subscore-icon">💬</div>
+            <div class="subscore-info">
+                <span class="subscore-label">Communication</span>
+                <div class="subscore-bar">
+                    <div class="subscore-fill" data-score="{{ evaluation.communication|default:0 }}" style="width: 0%"></div>
+                </div>
+                <span class="subscore-value">{{ evaluation.communication|default:"N/A" }}/10</span>
+            </div>
+        </div>
+        <div class="subscore-card">
+            <div class="subscore-icon">🧠</div>
+            <div class="subscore-info">
+                <span class="subscore-label">Technical</span>
+                <div class="subscore-bar">
+                    <div class="subscore-fill" data-score="{{ evaluation.technical|default:0 }}" style="width: 0%"></div>
+                </div>
+                <span class="subscore-value">{{ evaluation.technical|default:"N/A" }}/10</span>
+            </div>
+        </div>
+        <div class="subscore-card">
+            <div class="subscore-icon">💪</div>
+            <div class="subscore-info">
+                <span class="subscore-label">Confidence</span>
+                <div class="subscore-bar">
+                    <div class="subscore-fill" data-score="{{ evaluation.confidence|default:0 }}" style="width: 0%"></div>
+                </div>
+                <span class="subscore-value">{{ evaluation.confidence|default:"N/A" }}/10</span>
+            </div>
+        </div>
+        <div class="subscore-card">
+            <div class="subscore-icon">🎯</div>
+            <div class="subscore-info">
+                <span class="subscore-label">Clarity</span>
+                <div class="subscore-bar">
+                    <div class="subscore-fill" data-score="{{ evaluation.clarity|default:0 }}" style="width: 0%"></div>
+                </div>
+                <span class="subscore-value">{{ evaluation.clarity|default:"N/A" }}/10</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    {% if evaluation.summary %}
+    <div class="result-card" id="summary-card">
+        <h2 class="result-card-title">📋 Summary</h2>
+        <p class="result-card-text">{{ evaluation.summary }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Strengths & Weaknesses -->
+    <div class="result-columns">
+        {% if evaluation.strengths %}
+        <div class="result-card strengths-card" id="strengths-card">
+            <h2 class="result-card-title">✅ Strengths</h2>
+            <ul class="result-list">
+                {% for item in evaluation.strengths %}
+                <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if evaluation.weaknesses %}
+        <div class="result-card weaknesses-card" id="weaknesses-card">
+            <h2 class="result-card-title">⚠️ Areas to Improve</h2>
+            <ul class="result-list">
+                {% for item in evaluation.weaknesses %}
+                <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Suggestions -->
+    {% if evaluation.suggestions %}
+    <div class="result-card suggestions-card" id="suggestions-card">
+        <h2 class="result-card-title">💡 Suggestions for Improvement</h2>
+        <ul class="result-list">
+            {% for item in evaluation.suggestions %}
+            <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if not is_public_share %}
+    <div class="result-card share-card" id="share-card">
+        <h2 class="result-card-title">🔗 Share your score</h2>
+        <p class="result-card-text">
+            Turn this result into a referral loop. Share your interview score with friends or your network and invite them to try AI Interview Mentor.
+        </p>
+        <div class="share-panel">
+            <input
+                type="text"
+                class="share-link-input"
+                id="share-link"
+                value="{{ share_url }}"
+                readonly
+                aria-label="Shareable result link"
+            >
+            <button class="btn btn-primary" type="button" id="share-result-btn">
+                Copy Share Link
+            </button>
+        </div>
+        <p class="share-feedback" id="share-feedback" aria-live="polite"></p>
+        <div class="share-metrics" id="share-metrics">
+            <div class="share-metric">
+                <span class="share-metric-label">Share clicks</span>
+                <strong class="share-metric-value" id="share-clicks-count">{{ share_metrics.share_clicked }}</strong>
+            </div>
+            <div class="share-metric">
+                <span class="share-metric-label">Shared opens</span>
+                <strong class="share-metric-value" id="share-opens-count">{{ share_metrics.shared_result_opened }}</strong>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="result-card share-card share-card-public" id="share-card-public">
+        <h2 class="result-card-title">🚀 Practice your own interview</h2>
+        <p class="result-card-text">
+            Upload your resume, answer tailored interview questions, and get an instant score with strengths and coaching suggestions.
+        </p>
+        <div class="result-actions result-actions-inline">
+            <a href="{% url 'upload' %}" class="btn btn-primary btn-lg" id="shared-start-interview-btn">
+                Start Your Interview
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action buttons -->
+    <div class="result-actions">
+        {% if is_public_share %}
+        <a href="{% url 'index' %}" class="btn btn-secondary" id="home-btn">
+            Back to Home
+        </a>
+        {% else %}
+        <a href="{% url 'upload' %}" class="btn btn-primary btn-lg" id="new-interview-btn">
+            Start New Interview
+        </a>
+        <a href="{% url 'index' %}" class="btn btn-secondary" id="home-btn">
+            Back to Home
+        </a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Animate scores on page load -->
+<script>
+(function() {
+    const score = {{ evaluation.score|default:0 }};
+    const circumference = 339.292;
+    const progressCircle = document.getElementById('score-progress');
+    const scoreNumber = document.getElementById('score-number');
+
+    // Animate main score
+    setTimeout(() => {
+        const offset = circumference - (score / 10) * circumference;
+        progressCircle.style.transition = 'stroke-dashoffset 1.5s ease-out';
+        progressCircle.style.strokeDashoffset = offset;
+
+        // Count up animation
+        let current = 0;
+        const interval = setInterval(() => {
+            current += 0.1;
+            if (current >= score) {
+                current = score;
+                clearInterval(interval);
+            }
+            scoreNumber.textContent = current.toFixed(1);
+        }, 50);
+    }, 300);
+
+    // Animate sub-score bars
+    document.querySelectorAll('.subscore-fill').forEach((bar, i) => {
+        const val = parseInt(bar.dataset.score) || 0;
+        setTimeout(() => {
+            bar.style.transition = 'width 1s ease-out';
+            bar.style.width = (val * 10) + '%';
+        }, 500 + i * 200);
+    });
+
+    {% if not is_public_share %}
+    const shareButton = document.getElementById('share-result-btn');
+    const shareInput = document.getElementById('share-link');
+    const shareFeedback = document.getElementById('share-feedback');
+    const shareClicksCount = document.getElementById('share-clicks-count');
+
+    async function trackShareClick() {
+        const response = await fetch('{% url "api_share_event" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                interview_id: {{ interview.id }},
+                event: 'share_clicked'
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Tracking failed');
+        }
+
+        const data = await response.json();
+        if (shareClicksCount && typeof data.share_clicks === 'number') {
+            shareClicksCount.textContent = data.share_clicks;
+        }
+    }
+
+    async function copyShareLink() {
+        shareInput.focus();
+        shareInput.select();
+        shareInput.setSelectionRange(0, shareInput.value.length);
+
+        if (navigator.share) {
+            await navigator.share({
+                title: 'My AI Interview Mentor score',
+                text: 'Check out my AI interview result and try your own mock interview.',
+                url: shareInput.value
+            });
+            return 'Shared successfully.';
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(shareInput.value);
+            return 'Link copied to clipboard.';
+        }
+
+        const copied = document.execCommand('copy');
+        if (!copied) {
+            throw new Error('Copy failed');
+        }
+        return 'Link copied to clipboard.';
+    }
+
+    if (shareButton) {
+        shareButton.addEventListener('click', async () => {
+            shareFeedback.textContent = '';
+
+            try {
+                const message = await copyShareLink();
+                await trackShareClick();
+                shareFeedback.textContent = message;
+            } catch (error) {
+                shareFeedback.textContent = 'Could not share automatically. Copy the link manually.';
+            }
+        });
+    }
+    {% endif %}
+})();
+</script>
+{% endblock %}

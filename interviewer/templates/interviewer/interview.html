@@ -1,0 +1,70 @@
+{% extends 'interviewer/base.html' %}
+{% load static %}
+
+{% block title %}Interview in Progress — AI Interview Mentor{% endblock %}
+
+{% block content %}
+<section class="interview-section" id="interview-section">
+    <!-- Progress bar -->
+    <div class="progress-container" id="progress-container">
+        <div class="progress-info">
+            <span class="progress-label">Question <span id="current-q">1</span> of <span id="total-q">{{ total_questions }}</span></span>
+            <span class="progress-percent" id="progress-percent">0%</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- Chat area -->
+    <div class="chat-container" id="chat-container">
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages will be inserted here dynamically -->
+        </div>
+
+        <!-- Loading indicator -->
+        <div class="ai-thinking" id="ai-thinking" style="display: none;">
+            <div class="thinking-dots">
+                <span></span><span></span><span></span>
+            </div>
+            <span class="thinking-text">Sarah is thinking...</span>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="interview-controls" id="interview-controls">
+        <div class="live-transcript" id="live-transcript" style="display: none;">
+            <span class="transcript-label">🎙️ Listening...</span>
+            <p class="transcript-text" id="transcript-text"></p>
+        </div>
+
+        <div class="control-buttons">
+            <button class="btn btn-mic" id="mic-btn" title="Click to speak">
+                <svg class="mic-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+                <span class="mic-label" id="mic-label">Tap to Speak</span>
+            </button>
+            <button class="btn btn-skip" id="skip-btn" title="Skip this question">
+                Skip →
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Pass data to JavaScript -->
+<script>
+    window.INTERVIEW_DATA = {
+        interviewId: {{ interview.id }},
+        questions: {{ questions_json|safe }},
+        totalQuestions: {{ total_questions }},
+        askUrl: '{% url "api_ask" %}',
+        evaluateUrl: '{% url "api_evaluate" %}',
+        resultUrl: '{% url "result_page" interview.id %}',
+    };
+</script>
+<script src="{% static 'interviewer/js/interview.js' %}"></script>
+{% endblock %}
